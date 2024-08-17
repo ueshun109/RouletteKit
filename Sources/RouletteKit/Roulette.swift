@@ -16,7 +16,7 @@ public struct Roulette {
   /// １つのセクター当たりの角度
   let degreePerSector: Double
   /// 当たりのセクター
-  let hitSector: Sector
+  public let hitSector: Sector
   /// 停止開始から停止終了するまでの進んだ角度
   let forwardAngle: Angle = {
     var sum: Double = 0
@@ -81,6 +81,24 @@ extension Roulette {
   static let deceleration: Double = 0.01
   /// 何秒かけて回転速度を0にするか
   static let decelerationTime: Duration = .seconds(5)
+  /// ルーレットの外枠の幅
+  static let outlineWidth: Double = 20
+  /// ルーレット部分に対する中心円の比率
+  static let centerCircleRatio: Double = 0.25
+}
+
+// MARK: - Helper
+
+extension Roulette {
+  /// ルーレット部分の半径（外枠を除く）
+  static func raidus(width: Double, height: Double) -> Double {
+    min(width - outlineWidth, height - outlineWidth) / 2
+  }
+
+  /// 中心円の直径
+  static func centerCircleDiameter(width: Double) -> Double {
+    (width - outlineWidth) * centerCircleRatio
+  }
 }
 
 // MARK: - Sector
