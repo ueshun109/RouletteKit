@@ -7,11 +7,15 @@
 
 import SwiftUI
 
-public struct RouletteView: View {
+public struct RouletteView<Center>: View where Center: View {
   @ObservedObject private var model: RouletteController
+  private let center: (() -> Center)?
 
-  public init(rouletteController: RouletteController) {
+  public init(
+    rouletteController: RouletteController
+  ) where Center == EmptyView {
     self.model = rouletteController
+    self.center = nil
   }
 
   public var body: some View {
@@ -33,17 +37,22 @@ public struct RouletteView: View {
     }
   }
 
+  @ViewBuilder
   /// 🔘 Center circle
   func centerCircle(diameter: Double) -> some View {
     Circle()
       .fill(Color.white)
       .frame(width: diameter)
       .overlay {
-        Image(systemName: "star.fill")
-          .resizable()
-          .scaledToFit()
-          .frame(width: diameter / 2)
-          .foregroundStyle(Color.orange)
+        if let center {
+          center()
+        } else {
+          Image(systemName: "star.fill")
+            .resizable()
+            .scaledToFit()
+            .frame(width: diameter / 2)
+            .foregroundStyle(Color.orange)
+        }
       }
   }
 
@@ -115,6 +124,18 @@ public struct RouletteView: View {
   }
 }
 
+// MARK: - Initializer
+
+public extension RouletteView {
+  init(
+    rouletteController: RouletteController,
+    @ViewBuilder center: @escaping (() -> Center)
+  ) {
+    self.model = rouletteController
+    self.center = center
+  }
+}
+
 @available(iOS 18.0, *)
 #Preview {
   @Previewable @StateObject var rouletteController: RouletteController = .init(sectors: [
@@ -144,19 +165,35 @@ public struct RouletteView: View {
     .init(id: 7, text: "pink", color: .pink, dataCount: 9),
     .init(id: 8, text: "cyan", color: .cyan, dataCount: 9),
   ]
-  return VStack {
-    Text("Hit: \(rouletteController.roulette.hitSector.text)")
-    RouletteView(rouletteController: rouletteController)
-      .frame(width: 300, height: 300)
-    Button("START") {
-      rouletteController.start()
-    }
-    Button("STOP") {
-      rouletteController.stop()
-    }
-    Button("RESET") {
-      rouletteController.reset()
+  VStack {
+    RouletteView(rouletteController: rouletteController) {
+      switch rouletteController.status {
+      case .idle, .complete:
+        Button("START") {
+          rouletteController.start()
+        }
+      case .rotating, .stopping:
+        Button("STOP") {
+          rouletteController.stop()
+        }
+        .disabled(rouletteController.status == .stopping)
+      }
     }
   }
   .padding()
+//  return VStack {
+//    Text("Hit: \(rouletteController.roulette.hitSector.text)")
+//    RouletteView(rouletteController: rouletteController)
+//      .frame(width: 300, height: 300)
+//    Button("START") {
+//      rouletteController.start()
+//    }
+//    Button("STOP") {
+//      rouletteController.stop()
+//    }
+//    Button("RESET") {
+//      rouletteController.reset()
+//    }
+//  }
+//  .padding()
 }
