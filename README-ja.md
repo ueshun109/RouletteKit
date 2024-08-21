@@ -38,11 +38,11 @@ dependencies: [
 
 RouletteView(rouletteController: rouletteController) {
     switch rouletteController.status {
-        case .idle, .complete:
+    case .idle, .complete:
         Button("START") {
             rouletteController.start()
         }
-        case .rotating, .stopping:
+    case .rotating, .stopping:
         Button("STOP") {
             rouletteController.stop()
         }
@@ -51,14 +51,42 @@ RouletteView(rouletteController: rouletteController) {
 }
 ```
 
+またルーレットの項目のみカスタマイズすることもできます。
+
+```swift
+@StateObject var rouletteController: RouletteController = .init(sectors: [
+    .init(index: 0, count: 5, color: .red),
+    .init(index: 1, count: 5, color: .blue),
+    .init(index: 2, count: 5, color: .green),
+    .init(index: 3, count: 5, color: .yellow),
+    .init(index: 4, count: 5, color: .gray),
+])
+RouletteView(rouletteController: rouletteController) { sector in
+    Image(systemName: "\(sector.id + 1).square.fill")
+      .resizable()
+      .scaledToFit()
+      .frame(width: 40)
+      .rotationEffect(.degrees((sector.start.degrees + rouletteController.roulette.degreePerSector) / 2 + 90 + (rouletteController.roulette.degreePerSector / 2 * Double(sector.id))))
+} center: {
+    switch rouletteController.status {
+    case .idle, .complete:
+        Button("START") {
+            rouletteController.start()
+        }
+    case .rotating, .stopping:
+        Button("STOP") {
+            rouletteController.stop()
+        }
+        .disabled(rouletteController.status == .stopping)
+    }
+}
+.padding()
+```
+
 ## UI コンポーネントのみ独自で実装する
 
 デザインをアプリのコンセプトに合わせたい場合、UI を独自に実装することもできます。
 例えば画像をそのままルーレットに設定することもできます。
-
-
-
-0, 72, 144, 216, 288, 360
 
 # 開発環境
 
