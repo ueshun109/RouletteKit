@@ -51,6 +51,8 @@ RouletteView(rouletteController: rouletteController) {
 }
 ```
 
+https://github.com/user-attachments/assets/724c130d-30d7-4e5c-b89f-f4bb56e0de0d
+
 またルーレットの項目のみカスタマイズすることもできます。
 
 ```swift
@@ -82,6 +84,8 @@ RouletteView(rouletteController: rouletteController) { sector in
 }
 .padding()
 ```
+
+https://github.com/user-attachments/assets/bfff332e-6b19-4620-a72a-d4df91698741
 
 ## UI コンポーネントのみ独自で実装する
 

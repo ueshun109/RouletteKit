@@ -12,9 +12,9 @@ import SwiftUI
 /// ルーレットの盤面を表すモデル
 public struct Roulette {
   /// ルーレットの区分の集合
-  let sectors: [Sector]
+  public let sectors: [Sector]
   /// １つのセクター当たりの角度
-  let degreePerSector: Double
+  public let degreePerSector: Double
   /// 当たりのセクター
   public let hitSector: Sector
   /// 停止開始から停止終了するまでの進んだ角度
