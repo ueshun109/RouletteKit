@@ -7,14 +7,16 @@
 
 import SwiftUI
 
-public struct RouletteView<Center>: View where Center: View {
+public struct RouletteView<Content, Center>: View where Content: View, Center: View {
   @ObservedObject private var model: RouletteController
+  private let content: ((Roulette.Sector) -> Content)?
   private let center: (() -> Center)?
 
   public init(
     rouletteController: RouletteController
-  ) where Center == EmptyView {
+  ) where Content == EmptyView, Center == EmptyView {
     self.model = rouletteController
+    self.content = nil
     self.center = nil
   }
 
@@ -103,24 +105,30 @@ public struct RouletteView<Center>: View where Center: View {
     rouletteRadius: Double,
     centerCircleRadius: Double
   ) -> some View {
-    Text(sector.text)
-      .lineLimit(1)
-      .font(.body)
-      .bold()
-      .frame(width: rouletteRadius - centerCircleRadius)
-      .rotationEffect(.degrees(sector.start.degrees + model.roulette.degreePerSector / 2))
-      .offset(
-        CGSize(
-          width: { () -> Double in
-            let mean = (sector.start + sector.end) / 2
-            return (center + centerCircleRadius) * 0.5 * cos(mean.radians)
-          }(),
-          height: { () -> Double in
-            let mean = (sector.start + sector.end) / 2
-            return (center + centerCircleRadius) * 0.5 * sin(mean.radians)
-          }()
-        )
+    Group {
+      if let content {
+        content(sector)
+      } else {
+        Text(sector.text ?? "")
+          .lineLimit(1)
+          .font(.body)
+          .bold()
+          .rotationEffect(.degrees(sector.start.degrees + model.roulette.degreePerSector / 2))
+      }
+    }
+    .frame(width: rouletteRadius - centerCircleRadius)
+    .offset(
+      CGSize(
+        width: { () -> Double in
+          let mean = (sector.start + sector.end) / 2
+          return (center + centerCircleRadius) * 0.5 * cos(mean.radians)
+        }(),
+        height: { () -> Double in
+          let mean = (sector.start + sector.end) / 2
+          return (center + centerCircleRadius) * 0.5 * sin(mean.radians)
+        }()
       )
+    )
   }
 }
 
@@ -129,9 +137,29 @@ public struct RouletteView<Center>: View where Center: View {
 public extension RouletteView {
   init(
     rouletteController: RouletteController,
+    @ViewBuilder content: @escaping ((Roulette.Sector) -> Content)
+  ) where Center == EmptyView {
+    self.model = rouletteController
+    self.content = content
+    self.center = nil
+  }
+
+  init(
+    rouletteController: RouletteController,
+    @ViewBuilder center: @escaping (() -> Center)
+  ) where Content == EmptyView {
+    self.model = rouletteController
+    self.content = nil
+    self.center = center
+  }
+
+  init(
+    rouletteController: RouletteController,
+    @ViewBuilder content: @escaping ((Roulette.Sector) -> Content),
     @ViewBuilder center: @escaping (() -> Center)
   ) {
     self.model = rouletteController
+    self.content = content
     self.center = center
   }
 }
@@ -139,61 +167,59 @@ public extension RouletteView {
 @available(iOS 18.0, *)
 #Preview {
   @Previewable @StateObject var rouletteController: RouletteController = .init(sectors: [
-    .init(id: 0, text: "RED", color: .red, dataCount: 9),
-    .init(id: 1, text: "BLUE", color: .blue, dataCount: 9),
-    .init(id: 2, text: "GREEN", color: .green, dataCount: 9),
-    .init(id: 3, text: "YELLOW", color: .yellow, dataCount: 9),
-    .init(id: 4, text: "BROWN", color: .brown, dataCount: 9),
-    .init(id: 5, text: "purplepurplepurple", color: .purple, dataCount: 9),
-    .init(id: 6, text: "gray", color: .gray, dataCount: 9),
-    .init(id: 7, text: "pink", color: .pink, dataCount: 9),
-    .init(id: 8, text: "cyan", color: .cyan, dataCount: 9),
+    .init(index: 0, count: 9, text: "RED", color: .red),
+    .init(index: 1, count: 9, text: "BLUE", color: .blue),
+    .init(index: 2, count: 9, text: "GREEN", color: .green),
+    .init(index: 3, count: 9, text: "YELLOW", color: .yellow),
+    .init(index: 4, count: 9, text: "BROWN", color: .brown),
+    .init(index: 5, count: 9, text: "PURPLEPURPLEPURPLE", color: .purple),
+    .init(index: 6, count: 9, text: "GRAY", color: .gray),
+    .init(index: 7, count: 9, text: "PINK", color: .pink),
+    .init(index: 8, count: 9, text: "CYAN", color: .cyan),
   ])
-  let two: [Roulette.Sector] = [
-    .init(id: 0, text: "RED", color: .red, dataCount: 2),
-    .init(id: 1, text: "BLUE", color: .blue, dataCount: 2),
-  ]
-
-  let sectors: [Roulette.Sector] = [
-    .init(id: 0, text: "RED", color: .red, dataCount: 9),
-    .init(id: 1, text: "BLUE", color: .blue, dataCount: 9),
-    .init(id: 2, text: "GREEN", color: .green, dataCount: 9),
-    .init(id: 3, text: "YELLOW", color: .yellow, dataCount: 9),
-    .init(id: 4, text: "BROWN", color: .brown, dataCount: 9),
-    .init(id: 5, text: "purple", color: .purple, dataCount: 9),
-    .init(id: 6, text: "gray", color: .gray, dataCount: 9),
-    .init(id: 7, text: "pink", color: .pink, dataCount: 9),
-    .init(id: 8, text: "cyan", color: .cyan, dataCount: 9),
-  ]
-  VStack {
-    RouletteView(rouletteController: rouletteController) {
-      switch rouletteController.status {
-      case .idle, .complete:
-        Button("START") {
-          rouletteController.start()
-        }
-      case .rotating, .stopping:
-        Button("STOP") {
-          rouletteController.stop()
-        }
-        .disabled(rouletteController.status == .stopping)
+  RouletteView(rouletteController: rouletteController, center: {
+    switch rouletteController.status {
+    case .idle, .complete:
+      Button("START") {
+        rouletteController.start()
       }
+    case .rotating, .stopping:
+      Button("STOP") {
+        rouletteController.stop()
+      }
+      .disabled(rouletteController.status == .stopping)
+    }
+  })
+  .padding()
+}
+
+@available(iOS 18.0, *)
+#Preview {
+  @Previewable @StateObject var rouletteController: RouletteController = .init(sectors: [
+    .init(index: 0, count: 5, color: .red),
+    .init(index: 1, count: 5, color: .blue),
+    .init(index: 2, count: 5, color: .green),
+    .init(index: 3, count: 5, color: .yellow),
+    .init(index: 4, count: 5, color: .gray),
+  ])
+  RouletteView(rouletteController: rouletteController) { sector in
+    Image(systemName: "\(sector.id + 1).square.fill")
+      .resizable()
+      .scaledToFit()
+      .frame(width: 40)
+      .rotationEffect(.degrees((sector.start.degrees + rouletteController.roulette.degreePerSector) / 2 + 90 + (rouletteController.roulette.degreePerSector / 2 * Double(sector.id))))
+  } center: {
+    switch rouletteController.status {
+    case .idle, .complete:
+      Button("START") {
+        rouletteController.start()
+      }
+    case .rotating, .stopping:
+      Button("STOP") {
+        rouletteController.stop()
+      }
+      .disabled(rouletteController.status == .stopping)
     }
   }
   .padding()
-//  return VStack {
-//    Text("Hit: \(rouletteController.roulette.hitSector.text)")
-//    RouletteView(rouletteController: rouletteController)
-//      .frame(width: 300, height: 300)
-//    Button("START") {
-//      rouletteController.start()
-//    }
-//    Button("STOP") {
-//      rouletteController.stop()
-//    }
-//    Button("RESET") {
-//      rouletteController.reset()
-//    }
-//  }
-//  .padding()
 }

@@ -48,7 +48,7 @@ public struct Roulette {
       let degrees = round(for: hitSector.end.degrees)
       return Angle(degrees: point - degrees).degreesInCircle
     }()
-    print("lhs: \(lhs), rhs: \(rhs), \(hitSector.text)")
+    print("lhs: \(lhs), rhs: \(rhs), \(hitSector.text ?? "")")
     let splitDegrees = degreePerSector / Self.velocity <= Self.velocity ? Self.velocity : degreePerSector / Self.velocity
     let isCrossedBorder = rhs + degreePerSector > 360
     if isCrossedBorder {
@@ -106,18 +106,18 @@ extension Roulette {
 extension Roulette {
   public struct Sector: Identifiable {
     public var id: Int
-    var text: String
-    var color: Color
-    var start: Angle
-    var end: Angle
+    public var text: String?
+    public var color: Color
+    public var start: Angle
+    public var end: Angle
 
-    public init(id: Int, text: String, color: Color, dataCount: Int) {
-      let degreePerSector = 360.0 / Double(dataCount)
-      self.id = id
+    public init(index: Int, count: Int, text: String? = nil, color: Color) {
+      let degreePerSector = 360.0 / Double(count)
+      self.id = index
       self.text = text
       self.color = color
-      self.start = .degrees(degreePerSector * Double(id))
-      self.end = .degrees(degreePerSector * Double(id + 1))
+      self.start = .degrees(degreePerSector * Double(index))
+      self.end = .degrees(degreePerSector * Double(index + 1))
     }
   }
 }

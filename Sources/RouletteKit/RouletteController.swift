@@ -3,7 +3,7 @@ import SwiftUI
 
 @MainActor
 public final class RouletteController: ObservableObject {
-  @Published private(set) var rotateAngle: Angle = .degrees(0)
+  @Published private(set) var rotateAngle: Angle = .degrees(270)
   /// 回転させるために使用するタイマー
   private let rouletteTimer = AsyncTimerSequence(
     interval: Roulette.interval,
