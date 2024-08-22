@@ -4,19 +4,19 @@
 
 # RouletteKit
 
-RouletteKit は、SwiftUI で実装されており以下の機能を提供します。
+RouletteKit is implemented in SwiftUI and provides the following functionality
 
-- ルーレットを実現するための必要なロジック
-- シンプルなルーレットの UI コンポーネント
+- The necessary logic to realize roulette
+- A simple roulette UI component
 
-# サポートバージョン
+# Support Version
 
 - iOS 16.0+
 - MacOS 14.0+
 
-# インストール方法
+# Installation
 
-Swift Package Manager のみ対応しています。
+Only the Swift Package Manager is supported.
 
 ```swift
 dependencies: [
@@ -24,13 +24,13 @@ dependencies: [
 ]
 ```
 
-# 使い方
+# Usage
 
-本ライブラリが提供している UI コンポーネントを使用し簡単にルーレットを実装することができます。また UI 部分のみカスタマイズすることも可能です。
+Roulette can be easily implemented using the UI components provided by this library. It is also possible to customize only the UI.
 
-## 本ライブラリが提供している UI コンポーネントを使用する
+## Use UI components provided by the library
 
-ルーレットの項目としてテキストを設定する場合、提供している UI コンポーネント（`RouletteView`）を使用することができます。
+If you want to set text as a roulette item, you can use the provided UI component (`RouletteView`).
 
 ```swift
 @StateObject var rouletteController: RouletteController = .init(sectors: [
@@ -58,7 +58,7 @@ RouletteView(rouletteController: rouletteController) {
 
 https://github.com/user-attachments/assets/724c130d-30d7-4e5c-b89f-f4bb56e0de0d
 
-またルーレットの項目のみカスタマイズすることもできます。
+You can also customize only the roulette items.
 
 ```swift
 @StateObject var rouletteController: RouletteController = .init(sectors: [
@@ -91,13 +91,13 @@ RouletteView(rouletteController: rouletteController) { sector in
 
 https://github.com/user-attachments/assets/bfff332e-6b19-4620-a72a-d4df91698741
 
-## UI コンポーネントのみ独自で実装する
+## Implement only UI components on your own
 
-デザインをアプリのコンセプトに合わせたい場合、UI を独自に実装することもできます。
-例えば画像をそのままルーレットに設定することもできます。
+If you want the design to fit the concept of your app, you can implement your own UI.
+For example, you can use an image as a roulette.
 
 > [!NOTE]
-> データの始まりは、真上の左側のセクターからであることに注意してください。例えばデモ動画で使用している画像は、真上の左側のセクターが「No.2」であるため、データセットもそれに合わせて No.2 のデータを先頭にしてください。
+> Note that the data begins with the sector directly above and to the left. For example, the image used in the demo movie has “No. 2” in the upper left sector, so the data set should start with the No. 2 data accordingly.
 
 ```swift
 @StateObject private var rouletteController: RouletteController = .init(sectors: [
@@ -143,6 +143,6 @@ var roulette: some View {
 
 https://github.com/user-attachments/assets/373b22e8-6d83-4371-86b9-cabc03beea74
 
-# 開発環境
+# Development Environment
 
 - Xcode 16.0.0 Beta.6

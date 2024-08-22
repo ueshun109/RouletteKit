@@ -9,15 +9,15 @@ import SwiftUI
 
 // MARK: - Roulette
 
-/// ルーレットの盤面を表すモデル
+/// Model representing a roulette board
 public struct Roulette {
-  /// ルーレットの区分の集合
+  /// Set of roulette segments
   public let sectors: [Sector]
-  /// １つのセクター当たりの角度
+  /// Angle per sector
   public let degreePerSector: Double
-  /// 当たりのセクター
+  /// Winning Sector
   public let hitSector: Sector
-  /// 停止開始から停止終了するまでの進んだ角度
+  /// Angle advanced from start of stop to end of stop
   let forwardAngle: Angle = {
     var sum: Double = 0
     for i in 1...Int(Double(decelerationTime.components.seconds) / deceleration) {
@@ -31,13 +31,14 @@ public struct Roulette {
       fatalError("Unsupported that number of data is 72 or more.")
     }
     self.sectors = sectors
-    self.degreePerSector = round(for: 360.0 / Double(sectors.count))
+    self.degreePerSector = round(for: 360 / Double(sectors.count))
     self.hitSector = sectors.first(where: {
       return ($0.start.degreesInCircle..<$0.end.degreesInCircle).contains(round(for: hitDegrees))
     }) ?? sectors.first!
+    print("Hit sector: \(hitSector.text ?? "\(hitSector.id)")")
   }
 
-  /// 特定のセクターに停止させるための回転角度を算出する
+  /// Calculate the angle of rotation to stop at a specific sector
   func stopRotatingDegrees() -> [Range<Double>] {
     let point = Angle(degrees: 270 - forwardAngle.degreesInCircle).degreesInCircle
     let lhs: Double = {
@@ -48,7 +49,6 @@ public struct Roulette {
       let degrees = round(for: hitSector.end.degrees)
       return Angle(degrees: point - degrees).degreesInCircle
     }()
-    print("lhs: \(lhs), rhs: \(rhs), \(hitSector.text ?? "")")
     let splitDegrees = degreePerSector / Self.velocity <= Self.velocity ? Self.velocity : degreePerSector / Self.velocity
     let isCrossedBorder = rhs + degreePerSector > 360
     if isCrossedBorder {
@@ -73,29 +73,29 @@ public struct Roulette {
 // MARK: - Const
 
 extension Roulette {
-  /// ルーレットのベロシティ当たりの時間
+  /// Roulette time per velocity
   static let interval: Duration = .seconds(0.01)
-  /// 時計回り方向の回転速度（回転速度 / interval）
+  /// Clockwise rotation speed (rotation speed / interval)
   static let velocity: Double = 5
-  /// 減速度
+  /// Deceleration
   static let deceleration: Double = 0.01
-  /// 何秒かけて回転速度を0にするか
+  /// How many seconds to set the rotational speed to 0
   static let decelerationTime: Duration = .seconds(5)
-  /// ルーレットの外枠の幅
+  /// Width of the outer frame of the roule
   static let outlineWidth: Double = 20
-  /// ルーレット部分に対する中心円の比率
+  /// Ratio of center circle to roulette section
   static let centerCircleRatio: Double = 0.25
 }
 
 // MARK: - Helper
 
 extension Roulette {
-  /// ルーレット部分の半径（外枠を除く）
+  /// Radius of roulette section (excluding outer frame)
   static func raidus(width: Double, height: Double) -> Double {
     min(width - outlineWidth, height - outlineWidth) / 2
   }
 
-  /// 中心円の直径
+  /// Diameter of center circle
   static func centerCircleDiameter(width: Double) -> Double {
     (width - outlineWidth) * centerCircleRatio
   }

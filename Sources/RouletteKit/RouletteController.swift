@@ -1,33 +1,36 @@
 import AsyncAlgorithms
 import SwiftUI
 
+/// Logic to control roulette
 @MainActor
 public final class RouletteController: ObservableObject {
   @Published public private(set) var rotateAngle: Angle = .degrees(270)
-  /// 回転させるために使用するタイマー
+  @Published public private(set) var roulette: Roulette
+  @Published public private(set) var status: Status = .idle
+  /// Timer used to rotate
   private let rouletteTimer = AsyncTimerSequence(
     interval: Roulette.interval,
     clock: .continuous
   )
-  /// 停止開始から回転速度を減速させるために使用するタイマー
-  ///
-  /// forwardAngle分を一定期間かけて減らしていけばよいのか？そうすれば微妙にずれることはなくなる？
+  /// Timer used to decelerate the rotation speed from the start of stop
   private let stopTimer = AsyncTimerSequence(
     interval: Roulette.interval,
     clock: .continuous
   )
-  /// ルーレット
-  @Published public var roulette: Roulette
-  @Published public var status: Status = .idle
-  /// 止めるアニメーションを開始したいポイント
+  /// The point at which you want to start decelerating
   private var stopPoint: [Range<Double>]
-  /// 回転速度
   private var velocity = Roulette.velocity
   private var pause = false
   private var rouletteTask: Task<(), Never>? = nil
   private var stopTask: Task<(), Never>? = nil
 
-  public init(sectors: [Roulette.Sector]) {
+  public init(sectors: [Roulette.Sector] = []) {
+    let roulette = Roulette(sectors: sectors)
+    self.roulette = roulette
+    self.stopPoint = roulette.stopRotatingDegrees()
+  }
+
+  public func configure(sectors: [Roulette.Sector]) {
     let roulette = Roulette(sectors: sectors)
     self.roulette = roulette
     self.stopPoint = roulette.stopRotatingDegrees()
